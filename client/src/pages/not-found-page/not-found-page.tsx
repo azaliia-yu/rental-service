@@ -1,4 +1,5 @@
 import { JSX } from "react";
+import { Logo } from "../../components/logo/logo";
 
 function NotFoundPage(): JSX.Element {
   return (
@@ -7,15 +8,9 @@ function NotFoundPage(): JSX.Element {
         <div className="container">
           <div className="header__wrapper">
             <div className="header__left">
-              <a className="header__logo-link" href="/">
-                <img 
-                  className="header__logo" 
-                  src="img/logo.svg" 
-                  alt="Rent service logo" 
-                  width="81" 
-                  height="41" 
-                />
-              </a>
+            <div className="header__left">
+              <Logo />
+            </div>
             </div>
           </div>
         </div>
