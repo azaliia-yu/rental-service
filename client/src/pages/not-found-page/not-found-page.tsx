@@ -27,7 +27,7 @@ function NotFoundPage(): JSX.Element {
           <p style={{ fontSize: '1.5rem', marginBottom: '2rem' }}>Страница не найдена</p>
           <a href="/" className="button" style={{ 
             padding: '12px 24px', 
-            backgroundColor: '#4481c3', 
+            backgroundColor: '#6f98c4ff', 
             color: 'white', 
             textDecoration: 'none', 
             borderRadius: '4px' 
