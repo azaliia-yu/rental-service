@@ -13,6 +13,10 @@ const AuthorizationStatus = {
     Auth: 'AUTH',
     NoAuth: 'NO_AUTH',
     Unknown: 'UNKNOWN',
-}
+} as const;
 
-export { Setting, AppRoute, AuthorizationStatus};
+// Константы для карты (используем абсолютные URL как в демо-проекте)
+const URL_MARKER_DEFAULT = '/img/pin.svg';
+const URL_MARKER_CURRENT = '/img/pin-active.svg';
+
+export { Setting, AppRoute, AuthorizationStatus, URL_MARKER_DEFAULT, URL_MARKER_CURRENT };

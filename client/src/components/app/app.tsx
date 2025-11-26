@@ -31,7 +31,7 @@ function App({ rentalOffersCount, offers, offersList }: AppMainPageProps): JSX.E
                 />
                 <Route
                     path={`${AppRoute.Offer}/:id`} 
-                    element={<OfferPage offers={offers} />}
+                    element={<OfferPage offers={offers} offersList={offersList} />}
                 />
                 <Route
                     path={AppRoute.Favorites}

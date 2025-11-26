@@ -3,7 +3,6 @@ import ReactDOM from 'react-dom/client';
 import App from './components/app/app';
 import { Setting } from './const';
 
-
 import { offers } from './mocks/offers';
 import { offersList } from './mocks/offers-list';
 

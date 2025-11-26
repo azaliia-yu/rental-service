@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { AppRoute } from "../../const";
 import { Link } from "react-router-dom";
 
@@ -10,13 +9,37 @@ type CitiesCardProps = {
     isPremium: boolean;
     previewImage: string;
     rating: number;
+    onCardMouseEnter: (id: string) => void;
+    onCardMouseLeave: () => void;
 }
 
-function CitiesCard({ id, title, type, price, previewImage, isPremium, rating }: CitiesCardProps) {
+function CitiesCard({ 
+    id, 
+    title, 
+    type, 
+    price, 
+    previewImage, 
+    isPremium, 
+    rating, 
+    onCardMouseEnter, 
+    onCardMouseLeave 
+}: CitiesCardProps) {
     const ratingPercent = Math.round(rating * 20);
-    const [, setOfferId] = useState('');
+
+    const handleMouseEnter = () => {
+        onCardMouseEnter(id);
+    };
+
+    const handleMouseLeave = () => {
+        onCardMouseLeave();
+    };
+
     return (
-        <article className="cities__card place-card" onMouseOver={() => setOfferId(id)} onMouseOut={() => setOfferId('')}>
+        <article 
+            className="cities__card place-card" 
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+        >
             {isPremium && (
                 <div className="place-card__mark">
                     <span>Premium</span>
@@ -47,11 +70,11 @@ function CitiesCard({ id, title, type, price, previewImage, isPremium, rating }:
                     </div>
                 </div>
                 <h2 className="place-card__name">
-                    <a href={`/offer/${id}`}>{title}</a>
+                    <Link to={`${AppRoute.Offer}/${id}`}>{title}</Link>
                 </h2>
                 <p className="place-card__type">{type}</p>
             </div>
-        </article >
+        </article>
     );
 }
 
