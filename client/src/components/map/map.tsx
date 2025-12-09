@@ -15,6 +15,7 @@ type MapProps = {
 function Map({ city, points, selectedPoint, className = 'cities__map' }: MapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const map = useMap(mapRef, city);
+  const markersRef = useRef<leaflet.Marker[]>([]);
 
   const defaultCustomIcon = leaflet.icon({
     iconUrl: URL_MARKER_DEFAULT,
@@ -29,9 +30,18 @@ function Map({ city, points, selectedPoint, className = 'cities__map' }: MapProp
   });
 
   useEffect(() => {
+    if (map && city) {
+      map.setView([city.lat, city.lng], city.zoom);
+    }
+  }, [map, city]);
+
+  useEffect(() => {
     if (map) {
-      points.forEach((point) => {
-        leaflet
+      markersRef.current.forEach((marker) => marker.remove());
+      markersRef.current = [];
+
+      const newMarkers = points.map((point) => {
+        const marker = leaflet
           .marker({
             lat: point.lat,
             lng: point.lng,
@@ -41,8 +51,16 @@ function Map({ city, points, selectedPoint, className = 'cities__map' }: MapProp
               : defaultCustomIcon,
           })
           .addTo(map);
+        return marker;
       });
+
+      markersRef.current = newMarkers;
     }
+
+    return () => {
+      markersRef.current.forEach((marker) => marker.remove());
+      markersRef.current = [];
+    };
   }, [map, points, selectedPoint]);
 
   return (

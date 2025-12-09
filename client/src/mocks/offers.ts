@@ -91,16 +91,64 @@ export const offers: FullOffer[] = [
     ],
     maxAdults: 1
   },
+  
   {
-    id: '3',
-    title: 'Modern loft in city center',
+    id: '5',
+    title: 'Beautiful & luxurious apartment at great location',
     type: 'apartment',
-    price: 145,
+    price: 120,
+    city: {
+      name: 'Paris',
+      location: {
+        latitude: 48.85661,
+        longitude: 2.351499,
+        zoom: 13
+      }
+    },
+    location: {
+      latitude: 48.85661,
+      longitude: 2.351499,
+      zoom: 16
+    },
+    isFavorite: true,
+    isPremium: true,
+    rating: 4.8,
+    description: 'A beautiful & luxurious apartment located in the heart of Paris with stunning views.',
+    bedrooms: 2,
+    goods: [
+      'Wi-Fi',
+      'Washing machine',
+      'Towels',
+      'Heating',
+      'Coffee machine',
+      'Kitchen',
+      'Dishwasher',
+      'Cabel TV',
+      'Fridge',
+      'Balcony'
+    ],
+    host: {
+      name: 'Marie',
+      avatarUrl: 'img/avatar-angelina.jpg',
+      isPro: true
+    },
+    images: [
+      'img/apartment-01.jpg',
+      'img/apartment-02.jpg'
+    ],
+    maxAdults: 3
+  },
+
+  {
+    id: '8',
+    title: 'Modern apartment in Cologne center',
+    type: 'apartment',
+    price: 110,
     city: {
       name: 'Cologne',
       location: {
-        latitude: 50.938361,
-        longitude: 6.959974,
+        latitude: 50.9375,
+        longitude: 6.9603,
         zoom: 13
       }
     },
@@ -112,7 +160,7 @@ export const offers: FullOffer[] = [
     isFavorite: false,
     isPremium: true,
     rating: 4.7,
-    description: 'Contemporary loft space with open layout and premium finishes in the vibrant city center.',
+    description: 'Contemporary apartment in the vibrant city center of Cologne with all modern amenities.',
     bedrooms: 3,
     goods: [
       'Wi-Fi',
@@ -127,8 +175,8 @@ export const offers: FullOffer[] = [
       'Workspace'
     ],
     host: {
-      name: 'Maria',
-      avatarUrl: 'img/avatar-angelina.jpg',
+      name: 'Klaus',
+      avatarUrl: 'img/avatar-max.jpg',
       isPro: true
     },
     images: [
@@ -138,8 +186,9 @@ export const offers: FullOffer[] = [
     ],
     maxAdults: 4
   },
+
   {
-    id: '4',
+    id: '11',
     title: 'Charming house with garden',
     type: 'house',
     price: 195,

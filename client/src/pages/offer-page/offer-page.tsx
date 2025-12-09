@@ -6,7 +6,7 @@ import { ReviewsForm } from "../../components/reviews-form/reviews-form";
 import { ReviewsList } from "../../components/reviews-list/reviews-list";
 import { Map } from "../../components/map/map";
 import { MapPoint } from "../../types/map";
-import { reviewsData } from "../../mocks/reviews-data";
+import { reviews } from "../../mocks/reviews"; 
 import { amsterdamCity } from "../../mocks/city";
 import { NearPlacesList } from "../../components/near-places-list/near-places-list";
 import { useState } from 'react';
@@ -22,12 +22,13 @@ function OfferPage({ offers, offersList }: OfferPageProps){
   const offer = offers.find((item) => item.id === params.id);
   
   const [selectedPoint, setSelectedPoint] = useState<MapPoint | undefined>(undefined);
-  const [reviews, setReviews] = useState(reviewsData);
+  const [currentReviews, setCurrentReviews] = useState(reviews); 
   
   if (!offer){
     return <NotFoundPage/>;
   }
 
+  
   const handleAddReview = (newReviewData: Omit<Review, 'id' | 'date'>) => {
     const newReview: Review = {
       ...newReviewData,
@@ -35,7 +36,7 @@ function OfferPage({ offers, offersList }: OfferPageProps){
       date: new Date().toISOString(), 
     };
     
-    setReviews(prevReviews => [newReview, ...prevReviews]);
+    setCurrentReviews(prevReviews => [newReview, ...prevReviews]);
   };
 
   const nearbyOffers = offersList
@@ -194,7 +195,7 @@ function OfferPage({ offers, offersList }: OfferPageProps){
                 </div>
               </div>
               
-              <ReviewsList reviews={reviews} />
+              <ReviewsList reviews={currentReviews} /> 
               <ReviewsForm onAddReview={handleAddReview} />
             </div>
           </div>
