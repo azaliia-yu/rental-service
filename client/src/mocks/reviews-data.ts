@@ -8,7 +8,7 @@ export const reviewsData: Review[] = [
     rating: 4,
     user: {
       name: 'Isaac',
-      avatarUrl: '/img/avatar-angelina.jpg',
+      avatarUrl: 'img/avatar-angelina.jpg',
       isPro: true,
     },
   },
@@ -19,7 +19,7 @@ export const reviewsData: Review[] = [
     rating: 5,
     user: {
       name: 'Max',
-      avatarUrl: '/img/avatar-max.jpg',
+      avatarUrl: 'img/avatar-max.jpg',
       isPro: false,
     },
   },

@@ -10,6 +10,7 @@ import { reviewsData } from "../../mocks/reviews-data";
 import { amsterdamCity } from "../../mocks/city";
 import { NearPlacesList } from "../../components/near-places-list/near-places-list";
 import { useState } from 'react';
+import { Review, User } from "../../types/review";
 
 type OfferPageProps = {
   offers: FullOffer[];
@@ -21,17 +22,26 @@ function OfferPage({ offers, offersList }: OfferPageProps){
   const offer = offers.find((item) => item.id === params.id);
   
   const [selectedPoint, setSelectedPoint] = useState<MapPoint | undefined>(undefined);
+  const [reviews, setReviews] = useState(reviewsData);
   
   if (!offer){
     return <NotFoundPage/>;
   }
 
-  // Получаем 3 случайных предложения неподалёку (для демонстрации)
+  const handleAddReview = (newReviewData: Omit<Review, 'id' | 'date'>) => {
+    const newReview: Review = {
+      ...newReviewData,
+      id: crypto.randomUUID(), 
+      date: new Date().toISOString(), 
+    };
+    
+    setReviews(prevReviews => [newReview, ...prevReviews]);
+  };
+
   const nearbyOffers = offersList
     .filter(item => item.id !== offer.id)
     .slice(0, 3);
 
-  // Преобразуем в точки для карты
   const mapPoints: MapPoint[] = [
     {
       id: offer.id,
@@ -184,8 +194,8 @@ function OfferPage({ offers, offersList }: OfferPageProps){
                 </div>
               </div>
               
-              <ReviewsList reviews={reviewsData} />
-              <ReviewsForm />
+              <ReviewsList reviews={reviews} />
+              <ReviewsForm onAddReview={handleAddReview} />
             </div>
           </div>
           <section className="offer__map map">

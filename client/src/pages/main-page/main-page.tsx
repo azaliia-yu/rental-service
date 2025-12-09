@@ -14,10 +14,8 @@ type MainPageProps = {
 function MainPage({ rentalOffersCount, offersList }: MainPageProps): JSX.Element {
     const [selectedPoint, setSelectedPoint] = useState<MapPoint | undefined>(undefined);
     
-    // Фильтруем предложения для Амстердама
     const amsterdamOffers = offersList.filter(offer => offer.city.name === 'Amsterdam');
     
-    // Преобразуем предложения в точки для карты
     const mapPoints: MapPoint[] = amsterdamOffers.map(offer => ({
         id: offer.id,
         title: offer.title,

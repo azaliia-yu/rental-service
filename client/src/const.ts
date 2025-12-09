@@ -15,7 +15,6 @@ const AuthorizationStatus = {
     Unknown: 'UNKNOWN',
 } as const;
 
-// Константы для карты (используем абсолютные URL как в демо-проекте)
 const URL_MARKER_DEFAULT = '/img/pin.svg';
 const URL_MARKER_CURRENT = '/img/pin-active.svg';
 
