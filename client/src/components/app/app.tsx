@@ -16,7 +16,7 @@ type AppMainPageProps = {
     rentalOffersCount: number;
     offers: FullOffer[];
     offersList: OffersList[];
-    reviews: Review[]; 
+    reviews: Review[];
 }
 
 function App({ rentalOffersCount, offers, offersList, reviews }: AppMainPageProps): JSX.Element {
@@ -41,7 +41,7 @@ function App({ rentalOffersCount, offers, offersList, reviews }: AppMainPageProp
                         <PrivateRoute
                             authorizationStatus={AuthorizationStatus.Auth}
                         >
-                            <FavoritesPage offersList={offersList}/>
+                            <FavoritesPage />
                         </PrivateRoute>
                     }
                 />

@@ -11,6 +11,7 @@ import { amsterdamCity } from "../../mocks/city";
 import { NearPlacesList } from "../../components/near-places-list/near-places-list";
 import { useState } from 'react';
 import { Review, User } from "../../types/review";
+import { useAppSelector } from "../../hooks";
 
 type OfferPageProps = {
   offers: FullOffer[];
@@ -21,6 +22,10 @@ function OfferPage({ offers, offersList }: OfferPageProps){
   const params = useParams();
   const offer = offers.find((item) => item.id === params.id);
   
+  const storeOffersList = useAppSelector((state) => state.offers);
+  
+  const favoriteCount = storeOffersList.filter(item => item.isFavorite).length;
+  
   const [selectedPoint, setSelectedPoint] = useState<MapPoint | undefined>(undefined);
   const [currentReviews, setCurrentReviews] = useState(reviews); 
   
@@ -28,7 +33,6 @@ function OfferPage({ offers, offersList }: OfferPageProps){
     return <NotFoundPage/>;
   }
 
-  
   const handleAddReview = (newReviewData: Omit<Review, 'id' | 'date'>) => {
     const newReview: Review = {
       ...newReviewData,
@@ -84,7 +88,7 @@ function OfferPage({ offers, offersList }: OfferPageProps){
                     <div className="header__avatar-wrapper user__avatar-wrapper">
                     </div>
                     <span className="header__user-name user__name">Myemail@gmail.com</span>
-                    <span className="header__favorite-count">3</span>
+                    <span className="header__favorite-count">{favoriteCount}</span>
                   </a>
                 </li>
                 <li className="header__nav-item">

@@ -33,14 +33,14 @@ function Map({ city, points, selectedPoint, className = 'cities__map' }: MapProp
     if (map && city) {
       map.setView([city.lat, city.lng], city.zoom);
     }
-  }, [map, city]);
+  }, [map, city.lat, city.lng, city.zoom]); 
 
   useEffect(() => {
     if (map) {
       markersRef.current.forEach((marker) => marker.remove());
       markersRef.current = [];
 
-      const newMarkers = points.map((point) => {
+      points.forEach((point) => {
         const marker = leaflet
           .marker({
             lat: point.lat,
@@ -51,17 +51,29 @@ function Map({ city, points, selectedPoint, className = 'cities__map' }: MapProp
               : defaultCustomIcon,
           })
           .addTo(map);
-        return marker;
+        markersRef.current.push(marker);
       });
-
-      markersRef.current = newMarkers;
     }
 
     return () => {
-      markersRef.current.forEach((marker) => marker.remove());
-      markersRef.current = [];
+      if (map) {
+        markersRef.current.forEach((marker) => marker.remove());
+        markersRef.current = [];
+      }
     };
-  }, [map, points, selectedPoint]);
+  }, [map, points]); 
+
+  useEffect(() => {
+    if (map && markersRef.current.length) {
+      markersRef.current.forEach((marker, index) => {
+        const point = points[index];
+        if (point) {
+          const isSelected = selectedPoint && point.id === selectedPoint.id;
+          marker.setIcon(isSelected ? currentCustomIcon : defaultCustomIcon);
+        }
+      });
+    }
+  }, [map, selectedPoint, points]); 
 
   return (
     <div

@@ -1,4 +1,4 @@
-import { JSX, useState, useMemo } from "react";
+import { JSX, useState } from "react";
 import { Logo } from "../../components/logo/logo";
 import { CitiesCardList } from "../../components/cities-card-list/cities-card-list";
 import { Map } from "../../components/map/map";
@@ -13,6 +13,8 @@ function MainPage(): JSX.Element {
   const selectedCity = useAppSelector((state) => state.city);
   const offersList = useAppSelector((state) => state.offers);
   
+  const favoriteCount = offersList.filter(offer => offer.isFavorite).length;
+  
   const [activeSort, setActiveSort] = useState<SortOffer>('Popular');
   const [selectedPoint, setSelectedPoint] = useState<MapPoint | undefined>(undefined);
   
@@ -20,14 +22,12 @@ function MainPage(): JSX.Element {
   
   const sortedOffers = sortOffersByType(cityOffers, activeSort);
   
-  const mapPoints: MapPoint[] = useMemo(() => 
-    sortedOffers.map(offer => ({
-      id: offer.id,
-      title: offer.title,
-      lat: offer.location.latitude,
-      lng: offer.location.longitude
-    })), [sortedOffers]
-  );
+  const mapPoints: MapPoint[] = sortedOffers.map(offer => ({
+    id: offer.id,
+    title: offer.title,
+    lat: offer.location.latitude,
+    lng: offer.location.longitude
+  }));
 
   const handleCardMouseEnter = (id: string) => {
     const point = mapPoints.find((point) => point.id === id);
@@ -38,22 +38,17 @@ function MainPage(): JSX.Element {
     setSelectedPoint(undefined);
   };
 
-  const mapCity = useMemo(() => {
-    if (selectedCity) {
-      return {
-        title: selectedCity.name,
-        lat: selectedCity.location.latitude,
-        lng: selectedCity.location.longitude,
-        zoom: selectedCity.location.zoom
-      };
-    }
-    return {
-      title: 'Paris',
-      lat: 48.5112,
-      lng: 2.2055,
-      zoom: 8
-    };
-  }, [selectedCity]);
+  const mapCity = selectedCity ? {
+    title: selectedCity.name,
+    lat: selectedCity.location.latitude,
+    lng: selectedCity.location.longitude,
+    zoom: selectedCity.location.zoom
+  } : {
+    title: 'Paris',
+    lat: 48.5112,
+    lng: 2.2055,
+    zoom: 8
+  };
 
   return (
     <div className="page page--gray page--main">
@@ -70,7 +65,7 @@ function MainPage(): JSX.Element {
                     <div className="header__avatar-wrapper user__avatar-wrapper">
                     </div>
                     <span className="header__user-name user__name">Myemail@gmail.com</span>
-                    <span className="header__favorite-count">3</span>
+                    <span className="header__favorite-count">{favoriteCount}</span>
                   </a>
                 </li>
                 <li className="header__nav-item">
