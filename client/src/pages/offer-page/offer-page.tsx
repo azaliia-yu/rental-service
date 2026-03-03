@@ -1,65 +1,65 @@
-import { Logo } from "../../components/logo/logo";
-import { FullOffer, OffersList } from "../../types/offer";
-import { NotFoundPage } from "../not-found-page/not-found-page";
-import { useParams } from "react-router-dom";
-import { ReviewsForm } from "../../components/reviews-form/reviews-form";
-import { ReviewsList } from "../../components/reviews-list/reviews-list";
-import { Map } from "../../components/map/map";
-import { MapPoint } from "../../types/map";
-import { reviews } from "../../mocks/reviews"; 
-import { amsterdamCity } from "../../mocks/city";
-import { NearPlacesList } from "../../components/near-places-list/near-places-list";
-import { useState } from 'react';
-import { Review, User } from "../../types/review";
-import { useAppSelector } from "../../hooks";
+import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { Logo } from '../../components/logo/logo';
+import { FullOffer } from '../../types/offer';
+import { NotFoundPage } from '../not-found-page/not-found-page';
+import { ReviewsForm } from '../../components/reviews-form/reviews-form';
+import { ReviewsList } from '../../components/reviews-list/reviews-list';
+import { Map } from '../../components/map/map';
+import { MapPoint } from '../../types/map';
+import { NearPlacesList } from '../../components/near-places-list/near-places-list';
+import { Review } from '../../types/review';
+import { useAppDispatch, useAppSelector } from '../../hooks';
+import { fetchOfferAction, fetchReviewsAction } from '../../store/api-action';
+import { LoadingPage } from '../../components/loading-page/loading-page';
 
-type OfferPageProps = {
-  offers: FullOffer[];
-  offersList: OffersList[];
-}
+function OfferPage() {
+  const { id } = useParams();
+  const dispatch = useAppDispatch();
 
-function OfferPage({ offers, offersList }: OfferPageProps){
-  const params = useParams();
-  const offer = offers.find((item) => item.id === params.id);
-  
-  const storeOffersList = useAppSelector((state) => state.offers);
-  
-  const favoriteCount = storeOffersList.filter(item => item.isFavorite).length;
-  
+  const currentOffer = useAppSelector((state) => state.currentOffer) as FullOffer | null;
+  const isCurrentOfferLoading = useAppSelector((state) => state.isCurrentOfferLoading);
+  const offers = useAppSelector((state) => state.offers);
+  const reviews = useAppSelector((state) => state.reviews);
+
   const [selectedPoint, setSelectedPoint] = useState<MapPoint | undefined>(undefined);
-  const [currentReviews, setCurrentReviews] = useState(reviews); 
-  
-  if (!offer){
-    return <NotFoundPage/>;
-  }
+
+  useEffect(() => {
+    if (id) {
+      dispatch(fetchOfferAction(id));
+      dispatch(fetchReviewsAction(id));
+    }
+  }, [id, dispatch]);
 
   const handleAddReview = (newReviewData: Omit<Review, 'id' | 'date'>) => {
-    const newReview: Review = {
-      ...newReviewData,
-      id: crypto.randomUUID(), 
-      date: new Date().toISOString(), 
-    };
-    
-    setCurrentReviews(prevReviews => [newReview, ...prevReviews]);
+    console.log('New review:', newReviewData);
   };
 
-  const nearbyOffers = offersList
-    .filter(item => item.id !== offer.id)
+  if (isCurrentOfferLoading) {
+    return <LoadingPage />;
+  }
+
+  if (!currentOffer) {
+    return <NotFoundPage />;
+  }
+
+  const nearbyOffers = offers
+    .filter((item) => item.city.name === currentOffer.city.name && item.id !== currentOffer.id)
     .slice(0, 3);
 
   const mapPoints: MapPoint[] = [
     {
-      id: offer.id,
-      title: offer.title,
-      lat: offer.location.latitude,
-      lng: offer.location.longitude
+      id: currentOffer.id,
+      title: currentOffer.title,
+      lat: currentOffer.location.latitude,
+      lng: currentOffer.location.longitude,
     },
-    ...nearbyOffers.map(offer => ({
+    ...nearbyOffers.map((offer) => ({
       id: offer.id,
       title: offer.title,
       lat: offer.location.latitude,
-      lng: offer.location.longitude
-    }))
+      lng: offer.location.longitude,
+    })),
   ];
 
   const handleCardMouseEnter = (id: string) => {
@@ -71,7 +71,15 @@ function OfferPage({ offers, offersList }: OfferPageProps){
     setSelectedPoint(undefined);
   };
 
-  const galleryImages = offer.images.slice(0, 6);
+  const cityForMap = {
+    title: currentOffer.city.name,
+    lat: currentOffer.city.location.latitude,
+    lng: currentOffer.city.location.longitude,
+    zoom: currentOffer.city.location.zoom,
+  };
+
+  const galleryImages = currentOffer.images?.slice(0, 6) || [];
+  const favoriteCount = offers.filter((offer) => offer.isFavorite).length;
 
   return (
     <div className="page">
@@ -85,8 +93,7 @@ function OfferPage({ offers, offersList }: OfferPageProps){
               <ul className="header__nav-list">
                 <li className="header__nav-item user">
                   <a className="header__nav-link header__nav-link--profile" href="#">
-                    <div className="header__avatar-wrapper user__avatar-wrapper">
-                    </div>
+                    <div className="header__avatar-wrapper user__avatar-wrapper"></div>
                     <span className="header__user-name user__name">Myemail@gmail.com</span>
                     <span className="header__favorite-count">{favoriteCount}</span>
                   </a>
@@ -106,119 +113,125 @@ function OfferPage({ offers, offersList }: OfferPageProps){
         <section className="offer">
           <div className="offer__gallery-container container">
             <div className="offer__gallery">
-              {galleryImages.map((image) => (
+              {galleryImages.map((image, index) => (
                 <div key={image} className="offer__image-wrapper">
-                  <img 
-                    className="offer__image" 
-                    src={`/${image}`} 
-                    alt="Photo studio" 
+                  <img
+                    className="offer__image"
+                    src={image}
+                    alt={`Photo ${index + 1}`}
                   />
                 </div>
               ))}
             </div>
           </div>
+
           <div className="offer__container container">
             <div className="offer__wrapper">
-              {offer.isPremium && (
+              {currentOffer.isPremium && (
                 <div className="offer__mark">
                   <span>Premium</span>
                 </div>
               )}
-              
+
               <div className="offer__name-wrapper">
-                <h1 className="offer__name">
-                  {offer.title}
-                </h1>
-                <button className={`offer__bookmark-button button ${offer.isFavorite ? 'offer__bookmark-button--active' : ''}`} type="button">
+                <h1 className="offer__name">{currentOffer.title}</h1>
+                <button
+                  className={`offer__bookmark-button button ${
+                    currentOffer.isFavorite ? 'offer__bookmark-button--active' : ''
+                  }`}
+                  type="button"
+                >
                   <svg className="offer__bookmark-icon" width="31" height="33">
                     <use href="#icon-bookmark"></use>
                   </svg>
                   <span className="visually-hidden">To bookmarks</span>
                 </button>
               </div>
-              
+
               <div className="offer__rating rating">
                 <div className="offer__stars rating__stars">
-                  <span style={{width: `${(offer.rating / 5) * 100}%`}}></span>
+                  <span style={{ width: `${(currentOffer.rating / 5) * 100}%` }}></span>
                   <span className="visually-hidden">Rating</span>
                 </div>
-                <span className="offer__rating-value rating__value">{offer.rating}</span>
+                <span className="offer__rating-value rating__value">{currentOffer.rating}</span>
               </div>
-              
+
               <ul className="offer__features">
                 <li className="offer__feature offer__feature--entire">
-                  {offer.type.charAt(0).toUpperCase() + offer.type.slice(1)}
+                  {currentOffer.type.charAt(0).toUpperCase() + currentOffer.type.slice(1)}
                 </li>
                 <li className="offer__feature offer__feature--bedrooms">
-                  {offer.bedrooms} Bedroom{offer.bedrooms > 1 ? 's' : ''}
+                  {currentOffer.bedrooms} Bedroom{currentOffer.bedrooms > 1 ? 's' : ''}
                 </li>
                 <li className="offer__feature offer__feature--adults">
-                  Max {offer.maxAdults} adult{offer.maxAdults > 1 ? 's' : ''}
+                  Max {currentOffer.maxAdults} adult{currentOffer.maxAdults > 1 ? 's' : ''}
                 </li>
               </ul>
-              
+
               <div className="offer__price">
-                <b className="offer__price-value">&euro;{offer.price}</b>
+                <b className="offer__price-value">&euro;{currentOffer.price}</b>
                 <span className="offer__price-text">&nbsp;night</span>
               </div>
-              
+
               <div className="offer__inside">
                 <h2 className="offer__inside-title">What&apos;s inside</h2>
                 <ul className="offer__inside-list">
-                  {offer.goods.map((good) => (
+                  {currentOffer.goods.map((good) => (
                     <li key={good} className="offer__inside-item">
                       {good}
                     </li>
                   ))}
                 </ul>
               </div>
-              
+
               <div className="offer__host">
                 <h2 className="offer__host-title">Meet the host</h2>
                 <div className="offer__host-user user">
-                  <div className={`offer__avatar-wrapper ${offer.host.isPro ? 'offer__avatar-wrapper--pro' : ''} user__avatar-wrapper`}>
-                    <img 
-                      className="offer__avatar user__avatar" 
-                      src={`/${offer.host.avatarUrl}`} 
-                      width="74" 
-                      height="74" 
-                      alt="Host avatar" 
+                  <div
+                    className={`offer__avatar-wrapper ${
+                      currentOffer.host.isPro ? 'offer__avatar-wrapper--pro' : ''
+                    } user__avatar-wrapper`}
+                  >
+                    <img
+                      className="offer__avatar user__avatar"
+                      src={currentOffer.host.avatarUrl}
+                      width="74"
+                      height="74"
+                      alt="Host avatar"
                     />
                   </div>
-                  <span className="offer__user-name">
-                    {offer.host.name}
-                  </span>
-                  {offer.host.isPro && (
-                    <span className="offer__user-status">Pro</span>
-                  )}
+                  <span className="offer__user-name">{currentOffer.host.name}</span>
+                  {currentOffer.host.isPro && <span className="offer__user-status">Pro</span>}
                 </div>
                 <div className="offer__description">
-                  <p className="offer__text">
-                    {offer.description}
-                  </p>
+                  <p className="offer__text">{currentOffer.description}</p>
                 </div>
               </div>
-              
-              <ReviewsList reviews={currentReviews} /> 
+
+              <ReviewsList reviews={reviews} />
               <ReviewsForm onAddReview={handleAddReview} />
             </div>
           </div>
+
           <section className="offer__map map">
-            <Map 
-              city={amsterdamCity}
+            <Map
+              city={cityForMap}
               points={mapPoints}
-              selectedPoint={selectedPoint || {
-                id: offer.id,
-                title: offer.title,
-                lat: offer.location.latitude,
-                lng: offer.location.longitude
-              }}
+              selectedPoint={
+                selectedPoint || {
+                  id: currentOffer.id,
+                  title: currentOffer.title,
+                  lat: currentOffer.location.latitude,
+                  lng: currentOffer.location.longitude,
+                }
+              }
               className="offer__map"
             />
           </section>
         </section>
+
         <div className="container">
-          <NearPlacesList 
+          <NearPlacesList
             offers={nearbyOffers}
             onCardMouseEnter={handleCardMouseEnter}
             onCardMouseLeave={handleCardMouseLeave}

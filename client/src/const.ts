@@ -9,6 +9,13 @@ const AppRoute = {
     Offer: '/offer',
 } as const;
 
+const APIRoute = {
+  Offers: '/offers',
+  Login: '/login',
+  Logout: '/logout',
+  Comments: '/comments', 
+};
+
 const AuthorizationStatus = {
     Auth: 'AUTH',
     NoAuth: 'NO_AUTH',
@@ -17,6 +24,7 @@ const AuthorizationStatus = {
 
 const URL_MARKER_DEFAULT = '/img/pin.svg';
 const URL_MARKER_CURRENT = '/img/pin-active.svg';
+const TIMEOUT_SHOW_ERROR = 2000;
 
 const CITIES_LOCATION = [
   {
@@ -81,7 +89,9 @@ export {
   AppRoute, 
   AuthorizationStatus, 
   URL_MARKER_DEFAULT, 
-  URL_MARKER_CURRENT, 
+  URL_MARKER_CURRENT,
+  TIMEOUT_SHOW_ERROR, 
   CITIES_LOCATION,
-  SortOffersType 
+  SortOffersType ,
+  APIRoute
 };

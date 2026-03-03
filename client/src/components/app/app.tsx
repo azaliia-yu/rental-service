@@ -7,19 +7,19 @@ import { BrowserRouter } from 'react-router-dom';
 import { Route } from 'react-router-dom';
 import { Routes } from 'react-router-dom';
 import { PrivateRoute } from "../private-route/private-route";
-import { FullOffer, OffersList} from "../../types/offer";
+import { LoadingPage } from "../loading-page/loading-page";
+import { useAppSelector } from "../../hooks";
 import { AppRoute, AuthorizationStatus } from "../../const";
-import { Review } from "../../types/review";
 import { JSX } from "react";
 
-type AppMainPageProps = {
-    rentalOffersCount: number;
-    offers: FullOffer[];
-    offersList: OffersList[];
-    reviews: Review[];
-}
+function App(): JSX.Element {
+    const authorizationStatus = useAppSelector((state) => state.authorizationStatus);
+    const isOffersDataLoading = useAppSelector((state) => state.isOffersDataLoading);
 
-function App({ rentalOffersCount, offers, offersList, reviews }: AppMainPageProps): JSX.Element {
+    if (authorizationStatus === AuthorizationStatus.Unknown || isOffersDataLoading) {
+        return <LoadingPage />;
+    }
+
     return (
         <BrowserRouter>
             <Routes>
@@ -32,15 +32,13 @@ function App({ rentalOffersCount, offers, offersList, reviews }: AppMainPageProp
                     element={<LoginPage />}
                 />
                 <Route
-                    path={`${AppRoute.Offer}/:id`} 
-                    element={<OfferPage offers={offers} offersList={offersList} />}
+                    path={`${AppRoute.Offer}/:id`}
+                    element={<OfferPage />} // пропсы убраны
                 />
                 <Route
                     path={AppRoute.Favorites}
                     element={
-                        <PrivateRoute
-                            authorizationStatus={AuthorizationStatus.Auth}
-                        >
+                        <PrivateRoute authorizationStatus={authorizationStatus}>
                             <FavoritesPage />
                         </PrivateRoute>
                     }
@@ -51,7 +49,7 @@ function App({ rentalOffersCount, offers, offersList, reviews }: AppMainPageProp
                 />
             </Routes>
         </BrowserRouter>
-    )
+    );
 }
 
 export default App;

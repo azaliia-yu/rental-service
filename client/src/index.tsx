@@ -7,20 +7,21 @@ import { offers } from './mocks/offers';
 import { offersList } from './mocks/offers-list';
 import { reviews } from './mocks/reviews'; 
 import { store } from './store';
+import { ErrorMessage } from './components/error-message/error-message';
+import { checkAuthAction, fetchOffersAction } from './store/api-action';
+import './index.css';
+
+store.dispatch(checkAuthAction());
+store.dispatch(fetchOffersAction());
 
 const root = ReactDOM.createRoot(
-  document.getElementById('root') as HTMLElement
-)
+  document.getElementById('root') as HTMLElement)
 
 root.render(
   <React.StrictMode>
     <Provider store={store}>
-      <App
-        rentalOffersCount={ Setting.rentOffersCount }
-        offersList={ offersList }
-        offers = {offers}
-        reviews={reviews} 
-      />
+      <ErrorMessage/>
+      <App /> 
     </Provider>
   </React.StrictMode>
 );
