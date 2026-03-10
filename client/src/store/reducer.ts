@@ -6,11 +6,14 @@ import {
   setOffersDataLoadingStatus,
   setError,
   setReviews,
+  setUser,
+  setFavorites,
 } from './action';
 import { AuthorizationStatus, CITIES_LOCATION } from '../const';
 import { AuthorizationStatusType } from '../types/authorization-status';
 import { CityOffer, OffersList, FullOffer } from '../types/offer';
 import { Review } from '../types/review';
+import { UserData } from '../types/user-data';
 import { getCity } from '../utils';
 import { fetchOfferAction, fetchReviewsAction } from './api-action';
 
@@ -25,6 +28,8 @@ export type InitialState = {
   currentOffer: FullOffer | null;
   isCurrentOfferLoading: boolean;
   reviews: Review[];
+  user: UserData | null;
+  favorites: OffersList[];
 };
 
 const initialState: InitialState = {
@@ -36,6 +41,8 @@ const initialState: InitialState = {
   currentOffer: null,
   isCurrentOfferLoading: false,
   reviews: [],
+  user: null,
+  favorites: [],
 };
 
 export const reducer = createReducer(initialState, (builder) => {
@@ -58,7 +65,6 @@ export const reducer = createReducer(initialState, (builder) => {
     .addCase(setReviews, (state, action) => {
       state.reviews = action.payload;
     })
-    // fetchOfferAction
     .addCase(fetchOfferAction.pending, (state) => {
       state.isCurrentOfferLoading = true;
     })
@@ -71,6 +77,12 @@ export const reducer = createReducer(initialState, (builder) => {
     })
     .addCase(fetchReviewsAction.fulfilled, (state, action) => {
       state.reviews = action.payload;
+    })
+    .addCase(setUser, (state, action) => {
+      state.user = action.payload;
+    })
+    .addCase(setFavorites, (state, action) => {
+      state.favorites = action.payload;
     })
     .addCase(fetchReviewsAction.rejected, (state) => {
     });

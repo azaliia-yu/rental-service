@@ -9,6 +9,8 @@ import {
   setError,
   setOffersDataLoadingStatus,
   setReviews,
+  setUser,
+  setFavorites,
 } from './action';
 import { saveToken, dropToken } from '../services/token';
 import { APIRoute, AuthorizationStatus, TIMEOUT_SHOW_ERROR } from '../const';
@@ -17,7 +19,7 @@ import { adaptOfferToClient } from '../utils.js';
 
 export const clearErrorAction = createAsyncThunk(
   'clearError',
-  (_, { dispatch }) => {
+  (_arg, { dispatch }) => {
     setTimeout(() => {
       dispatch(setError(null));
     }, TIMEOUT_SHOW_ERROR);
@@ -78,6 +80,35 @@ export const fetchReviewsAction = createAsyncThunk<Review[], string, {
   }
 );
 
+export const fetchFavoritesAction = createAsyncThunk<void, undefined, {
+  dispatch: AppDispatch;
+  state: State;
+  extra: AxiosInstance;
+}>(
+  'favorites/fetch',
+  async (_arg, { dispatch, extra: api }) => {
+    const { data } = await api.get<OffersList[]>(APIRoute.Favorite);
+    dispatch(setFavorites(data));
+  }
+);
+
+export const postReviewAction = createAsyncThunk<void, { offerId: string; comment: string; rating: number }, {
+  dispatch: AppDispatch;
+  state: State;
+  extra: AxiosInstance;
+}>(
+  'reviews/post',
+  async ({ offerId, comment, rating }, { dispatch, extra: api, rejectWithValue }) => {
+    try {
+      await api.post(`${APIRoute.Comments}/${offerId}`, { comment, rating });
+      dispatch(fetchReviewsAction(offerId));
+    } catch (error) {
+      dispatch(setError('Failed to post review.'));
+      return rejectWithValue((error as Error).message);
+    }
+  }
+);
+
 export const checkAuthAction = createAsyncThunk<void, undefined, {
   dispatch: AppDispatch;
   state: State;
@@ -86,9 +117,12 @@ export const checkAuthAction = createAsyncThunk<void, undefined, {
   'user/checkAuth',
   async (_arg, { dispatch, extra: api }) => {
     try {
-      await api.get(APIRoute.Login);
+      const { data } = await api.get<UserData>(APIRoute.Login);
+      dispatch(setUser(data));
       dispatch(requireAuthorization(AuthorizationStatus.Auth));
+      dispatch(fetchFavoritesAction());
     } catch {
+      dispatch(setUser(null));
       dispatch(requireAuthorization(AuthorizationStatus.NoAuth));
     }
   },
@@ -104,10 +138,13 @@ export const loginAction = createAsyncThunk<
     try {
       const { data } = await api.post<UserData>(APIRoute.Login, { email, password });
       saveToken(data.token);
+      dispatch(setUser(data));
       dispatch(requireAuthorization(AuthorizationStatus.Auth));
+      dispatch(fetchFavoritesAction());
       return data;
     } catch (err) {
       dropToken();
+      dispatch(setUser(null));
       dispatch(requireAuthorization(AuthorizationStatus.NoAuth));
       return rejectWithValue('Login failed');
     }
@@ -123,6 +160,8 @@ export const logoutAction = createAsyncThunk<void, undefined, {
   async (_arg, { dispatch, extra: api }) => {
     await api.delete(APIRoute.Logout);
     dropToken();
+    dispatch(setUser(null));
     dispatch(requireAuthorization(AuthorizationStatus.NoAuth));
+    dispatch(setFavorites([]));
   },
 );

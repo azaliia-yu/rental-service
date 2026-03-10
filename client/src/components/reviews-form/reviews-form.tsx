@@ -1,164 +1,73 @@
-import React, { useState, FormEvent, ChangeEvent } from "react";
-import { Review } from '../../types/review';
+import React, { useState, FormEvent, ChangeEvent } from 'react';
+import { useParams } from 'react-router-dom';
+import { useAppDispatch } from '../../hooks';
+import { postReviewAction } from '../../store/api-action';
 
-type ReviewsFormProps = {
-  onAddReview: (newReview: Omit<Review, 'id' | 'date'>) => void;
-};
-
-function ReviewsForm({ onAddReview }: ReviewsFormProps) {
-  const [formData, setFormData] = useState({
-    rating: 0,
-    review: ''
-  });
+function ReviewsForm() {
+  const { id } = useParams<{ id: string }>();
+  const dispatch = useAppDispatch();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState({ rating: 0, review: '' });
 
   const handleRatingChange = (evt: ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      rating: Number(evt.target.value)
-    });
+    setFormData({ ...formData, rating: Number(evt.target.value) });
   };
 
   const handleReviewChange = (evt: ChangeEvent<HTMLTextAreaElement>) => {
-    setFormData({
-      ...formData,
-      review: evt.target.value
-    });
+    setFormData({ ...formData, review: evt.target.value });
   };
 
-  const handleSubmit = (evt: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (evt: FormEvent<HTMLFormElement>) => {
     evt.preventDefault();
-    
-    if (isSubmitDisabled) return;
-    
+    if (!id || formData.rating === 0 || formData.review.length < 50) return;
+
+    setIsSubmitting(true);
     try {
-      const newReview: Omit<Review, 'id' | 'date'> = {
-        comment: formData.review,
-        rating: formData.rating,
-        user: {
-          name: 'Current User',
-          avatarUrl: '/img/avatar.svg',
-          isPro: false,
-        },
-      };
-      
-      onAddReview(newReview);
-      
-      setFormData({
-        rating: 0,
-        review: ''
-      });
-      
-      console.log('Review submitted:', formData);
-    } catch (error) {
-      console.error('Error submitting review:', error);
+      await dispatch(
+        postReviewAction({
+          offerId: id,
+          comment: formData.review,
+          rating: formData.rating,
+        })
+      ).unwrap();
+      setFormData({ rating: 0, review: '' });
+    } catch {
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const isSubmitDisabled = 
-    formData.rating === 0 || 
-    formData.review.length < 50;
+  const isSubmitDisabled = formData.rating === 0 || formData.review.length < 50 || isSubmitting;
 
   return (
     <form className="reviews__form form" action="#" method="post" onSubmit={handleSubmit}>
       <label className="reviews__label form__label" htmlFor="review">
         Your review
       </label>
-
       <div className="reviews__rating-form form__rating">
-        <input
-          className="form__rating-input visually-hidden"
-          name="rating"
-          value="5"
-          id="5-stars"
-          type="radio"
-          checked={formData.rating === 5}
-          onChange={handleRatingChange}
-        />
-        <label
-          htmlFor="5-stars"
-          className="reviews__rating-label form__rating-label"
-          title="perfect"
-        >
-          <svg className="form__star-image" width="37" height="33">
-            <use xlinkHref="#icon-star"></use>
-          </svg>
-        </label>
-
-        <input
-          className="form__rating-input visually-hidden"
-          name="rating"
-          value="4"
-          id="4-stars"
-          type="radio"
-          checked={formData.rating === 4}
-          onChange={handleRatingChange}
-        />
-        <label
-          htmlFor="4-stars"
-          className="reviews__rating-label form__rating-label"
-          title="good"
-        >
-          <svg className="form__star-image" width="37" height="33">
-            <use xlinkHref="#icon-star"></use>
-          </svg>
-        </label>
-
-        <input
-          className="form__rating-input visually-hidden"
-          name="rating"
-          value="3"
-          id="3-stars"
-          type="radio"
-          checked={formData.rating === 3}
-          onChange={handleRatingChange}
-        />
-        <label
-          htmlFor="3-stars"
-          className="reviews__rating-label form__rating-label"
-          title="not bad"
-        >
-          <svg className="form__star-image" width="37" height="33">
-            <use xlinkHref="#icon-star"></use>
-          </svg>
-        </label>
-
-        <input
-          className="form__rating-input visually-hidden"
-          name="rating"
-          value="2"
-          id="2-stars"
-          type="radio"
-          checked={formData.rating === 2}
-          onChange={handleRatingChange}
-        />
-        <label
-          htmlFor="2-stars"
-          className="reviews__rating-label form__rating-label"
-          title="badly"
-        >
-          <svg className="form__star-image" width="37" height="33">
-            <use xlinkHref="#icon-star"></use>
-          </svg>
-        </label>
-
-        <input
-          className="form__rating-input visually-hidden"
-          name="rating"
-          value="1"
-          id="1-star"
-          type="radio"
-          checked={formData.rating === 1}
-          onChange={handleRatingChange}
-        />
-        <label
-          htmlFor="1-star"
-          className="reviews__rating-label form__rating-label"
-          title="terribly"
-        >
-          <svg className="form__star-image" width="37" height="33">
-            <use xlinkHref="#icon-star"></use>
-          </svg>
-        </label>
+        {[5, 4, 3, 2, 1].map((value) => (
+          <React.Fragment key={value}>
+            <input
+              className="form__rating-input visually-hidden"
+              name="rating"
+              value={value}
+              id={`${value}-stars`}
+              type="radio"
+              checked={formData.rating === value}
+              onChange={handleRatingChange}
+              disabled={isSubmitting}
+            />
+            <label
+              htmlFor={`${value}-stars`}
+              className="reviews__rating-label form__rating-label"
+              title={value === 5 ? 'perfect' : value === 4 ? 'good' : value === 3 ? 'not bad' : value === 2 ? 'badly' : 'terribly'}
+            >
+              <svg className="form__star-image" width="37" height="33">
+                <use xlinkHref="#icon-star"></use>
+              </svg>
+            </label>
+          </React.Fragment>
+        ))}
       </div>
 
       <textarea
@@ -168,12 +77,12 @@ function ReviewsForm({ onAddReview }: ReviewsFormProps) {
         placeholder="Tell how was your stay, what you like and what can be improved"
         value={formData.review}
         onChange={handleReviewChange}
+        disabled={isSubmitting}
       ></textarea>
 
       <div className="reviews__button-wrapper">
         <p className="reviews__help">
-          To submit review please make sure to set{" "}
-          <span className="reviews__star">rating</span> and describe
+          To submit review please make sure to set <span className="reviews__star">rating</span> and describe
           your stay with at least <b className="reviews__text-amount">50 characters</b>.
         </p>
         <button

@@ -33,7 +33,7 @@ function App(): JSX.Element {
                 />
                 <Route
                     path={`${AppRoute.Offer}/:id`}
-                    element={<OfferPage />} // пропсы убраны
+                    element={<OfferPage />} 
                 />
                 <Route
                     path={AppRoute.Favorites}

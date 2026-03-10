@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Logo } from '../../components/logo/logo';
 import { FullOffer } from '../../types/offer';
 import { NotFoundPage } from '../not-found-page/not-found-page';
 import { ReviewsForm } from '../../components/reviews-form/reviews-form';
@@ -12,6 +11,8 @@ import { Review } from '../../types/review';
 import { useAppDispatch, useAppSelector } from '../../hooks';
 import { fetchOfferAction, fetchReviewsAction } from '../../store/api-action';
 import { LoadingPage } from '../../components/loading-page/loading-page';
+import Header from '../../components/header/header';  
+import { AuthorizationStatus } from '../../const';
 
 function OfferPage() {
   const { id } = useParams();
@@ -21,6 +22,7 @@ function OfferPage() {
   const isCurrentOfferLoading = useAppSelector((state) => state.isCurrentOfferLoading);
   const offers = useAppSelector((state) => state.offers);
   const reviews = useAppSelector((state) => state.reviews);
+  const authorizationStatus = useAppSelector((state) => state.authorizationStatus);
 
   const [selectedPoint, setSelectedPoint] = useState<MapPoint | undefined>(undefined);
 
@@ -79,35 +81,10 @@ function OfferPage() {
   };
 
   const galleryImages = currentOffer.images?.slice(0, 6) || [];
-  const favoriteCount = offers.filter((offer) => offer.isFavorite).length;
 
   return (
     <div className="page">
-      <header className="header">
-        <div className="container">
-          <div className="header__wrapper">
-            <div className="header__left">
-              <Logo />
-            </div>
-            <nav className="header__nav">
-              <ul className="header__nav-list">
-                <li className="header__nav-item user">
-                  <a className="header__nav-link header__nav-link--profile" href="#">
-                    <div className="header__avatar-wrapper user__avatar-wrapper"></div>
-                    <span className="header__user-name user__name">Myemail@gmail.com</span>
-                    <span className="header__favorite-count">{favoriteCount}</span>
-                  </a>
-                </li>
-                <li className="header__nav-item">
-                  <a className="header__nav-link" href="#">
-                    <span className="header__signout">Sign out</span>
-                  </a>
-                </li>
-              </ul>
-            </nav>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       <main className="page__main page__main--offer">
         <section className="offer">
@@ -209,7 +186,10 @@ function OfferPage() {
               </div>
 
               <ReviewsList reviews={reviews} />
-              <ReviewsForm onAddReview={handleAddReview} />
+
+              {authorizationStatus === AuthorizationStatus.Auth && (
+                <ReviewsForm />
+              )}
             </div>
           </div>
 
