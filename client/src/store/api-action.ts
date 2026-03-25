@@ -165,3 +165,24 @@ export const logoutAction = createAsyncThunk<void, undefined, {
     dispatch(setFavorites([]));
   },
 );
+
+export const toggleFavoriteAction = createAsyncThunk<
+  OffersList,
+  { offerId: string; status: number },
+  { dispatch: AppDispatch; state: State; extra: AxiosInstance }
+>(
+  'favorites/toggle',
+  async ({ offerId, status }, { dispatch, extra: api, rejectWithValue }) => {
+    try {
+      const { data } = await api.post<OffersList>(
+        `${APIRoute.Favorite}/${offerId}/${status}`
+      );
+      dispatch(fetchFavoritesAction());
+      dispatch(fetchOffersAction());
+      return data;
+    } catch (error) {
+      dispatch(setError('Failed to update favorite status.'));
+      return rejectWithValue(error);
+    }
+  }
+);

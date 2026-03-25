@@ -4,6 +4,8 @@ import { OffersList } from '../../types/offer';
 import { useAppDispatch, useAppSelector } from '../../hooks';
 import { fetchFavoritesAction } from '../../store/api-action';
 import Header from '../../components/header/header';
+import { Link } from 'react-router-dom';
+import { AppRoute } from '../../const';
 
 function FavoritesPage() {
   const dispatch = useAppDispatch();
@@ -25,7 +27,6 @@ function FavoritesPage() {
   return (
     <div className="page">
       <Header />
-
       <main className="page__main page__main--favorites">
         <div className="page__favorites-container container">
           <section className="favorites">
@@ -43,9 +44,9 @@ function FavoritesPage() {
                   <li key={cityName} className="favorites__locations-items">
                     <div className="favorites__locations locations locations--current">
                       <div className="locations__item">
-                        <a className="locations__item-link" href="#">
+                        <Link className="locations__item-link" to={AppRoute.Main}>
                           <span>{cityName}</span>
-                        </a>
+                        </Link>
                       </div>
                     </div>
                     <FavoritesCardList offersList={cityOffers} />
@@ -56,7 +57,6 @@ function FavoritesPage() {
           </section>
         </div>
       </main>
-
       <footer className="footer container">
         <a className="footer__logo-link" href="main.html">
           <img className="footer__logo" src="img/logo.svg" alt="Rent service logo" width="64" height="33" />

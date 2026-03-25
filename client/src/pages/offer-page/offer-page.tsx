@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { FullOffer } from '../../types/offer';
 import { NotFoundPage } from '../not-found-page/not-found-page';
 import { ReviewsForm } from '../../components/reviews-form/reviews-form';
@@ -9,21 +9,22 @@ import { MapPoint } from '../../types/map';
 import { NearPlacesList } from '../../components/near-places-list/near-places-list';
 import { Review } from '../../types/review';
 import { useAppDispatch, useAppSelector } from '../../hooks';
-import { fetchOfferAction, fetchReviewsAction } from '../../store/api-action';
+import { fetchOfferAction, fetchReviewsAction, toggleFavoriteAction } from '../../store/api-action';
 import { LoadingPage } from '../../components/loading-page/loading-page';
-import Header from '../../components/header/header';  
-import { AuthorizationStatus } from '../../const';
+import Header from '../../components/header/header';
+import { AuthorizationStatus, AppRoute } from '../../const';
 
 function OfferPage() {
   const { id } = useParams();
   const dispatch = useAppDispatch();
-
+  const navigate = useNavigate();
+  
   const currentOffer = useAppSelector((state) => state.currentOffer) as FullOffer | null;
   const isCurrentOfferLoading = useAppSelector((state) => state.isCurrentOfferLoading);
   const offers = useAppSelector((state) => state.offers);
   const reviews = useAppSelector((state) => state.reviews);
   const authorizationStatus = useAppSelector((state) => state.authorizationStatus);
-
+  
   const [selectedPoint, setSelectedPoint] = useState<MapPoint | undefined>(undefined);
 
   useEffect(() => {
@@ -35,6 +36,20 @@ function OfferPage() {
 
   const handleAddReview = (newReviewData: Omit<Review, 'id' | 'date'>) => {
     console.log('New review:', newReviewData);
+  };
+
+  const handleBookmarkClick = () => {
+    if (authorizationStatus !== AuthorizationStatus.Auth) {
+      navigate(AppRoute.Login);
+      return;
+    }
+    
+    if (currentOffer) {
+      dispatch(toggleFavoriteAction({
+        offerId: currentOffer.id,
+        status: currentOffer.isFavorite ? 0 : 1
+      }));
+    }
   };
 
   if (isCurrentOfferLoading) {
@@ -85,7 +100,6 @@ function OfferPage() {
   return (
     <div className="page">
       <Header />
-
       <main className="page__main page__main--offer">
         <section className="offer">
           <div className="offer__gallery-container container">
@@ -101,7 +115,6 @@ function OfferPage() {
               ))}
             </div>
           </div>
-
           <div className="offer__container container">
             <div className="offer__wrapper">
               {currentOffer.isPremium && (
@@ -109,7 +122,6 @@ function OfferPage() {
                   <span>Premium</span>
                 </div>
               )}
-
               <div className="offer__name-wrapper">
                 <h1 className="offer__name">{currentOffer.title}</h1>
                 <button
@@ -117,14 +129,16 @@ function OfferPage() {
                     currentOffer.isFavorite ? 'offer__bookmark-button--active' : ''
                   }`}
                   type="button"
+                  onClick={handleBookmarkClick}
                 >
                   <svg className="offer__bookmark-icon" width="31" height="33">
                     <use href="#icon-bookmark"></use>
                   </svg>
-                  <span className="visually-hidden">To bookmarks</span>
+                  <span className="visually-hidden">
+                    {currentOffer.isFavorite ? 'In bookmarks' : 'To bookmarks'}
+                  </span>
                 </button>
               </div>
-
               <div className="offer__rating rating">
                 <div className="offer__stars rating__stars">
                   <span style={{ width: `${(currentOffer.rating / 5) * 100}%` }}></span>
@@ -132,7 +146,6 @@ function OfferPage() {
                 </div>
                 <span className="offer__rating-value rating__value">{currentOffer.rating}</span>
               </div>
-
               <ul className="offer__features">
                 <li className="offer__feature offer__feature--entire">
                   {currentOffer.type.charAt(0).toUpperCase() + currentOffer.type.slice(1)}
@@ -144,12 +157,10 @@ function OfferPage() {
                   Max {currentOffer.maxAdults} adult{currentOffer.maxAdults > 1 ? 's' : ''}
                 </li>
               </ul>
-
               <div className="offer__price">
                 <b className="offer__price-value">&euro;{currentOffer.price}</b>
                 <span className="offer__price-text">&nbsp;night</span>
               </div>
-
               <div className="offer__inside">
                 <h2 className="offer__inside-title">What&apos;s inside</h2>
                 <ul className="offer__inside-list">
@@ -160,7 +171,6 @@ function OfferPage() {
                   ))}
                 </ul>
               </div>
-
               <div className="offer__host">
                 <h2 className="offer__host-title">Meet the host</h2>
                 <div className="offer__host-user user">
@@ -184,15 +194,12 @@ function OfferPage() {
                   <p className="offer__text">{currentOffer.description}</p>
                 </div>
               </div>
-
               <ReviewsList reviews={reviews} />
-
               {authorizationStatus === AuthorizationStatus.Auth && (
                 <ReviewsForm />
               )}
             </div>
           </div>
-
           <section className="offer__map map">
             <Map
               city={cityForMap}
@@ -209,7 +216,6 @@ function OfferPage() {
             />
           </section>
         </section>
-
         <div className="container">
           <NearPlacesList
             offers={nearbyOffers}
